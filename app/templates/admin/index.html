@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Admin</h1>
+
+  <form method="post" action="{{ url_for('auth.logout') }}">
+    <button type="submit">Logout</button>
+  </form>
+
+  <p>Welcome, {{ current_user.username }}!</p>
+{% endblock %}
