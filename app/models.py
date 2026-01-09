@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db, login_manager
@@ -110,50 +110,33 @@ class Match(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    team_id = db.Column(db.Integer, db.ForeignKey("teams.id"), nullable=False)
-    team = db.relationship("Team")
-
     season_id = db.Column(db.Integer, db.ForeignKey("seasons.id"), nullable=False)
-    tournament_id = db.Column(db.Integer, db.ForeignKey("tournaments.id"), nullable=False)
 
-    date_time = db.Column(db.DateTime, nullable=False)
+    date = db.Column(db.Date, nullable=False)
     opponent = db.Column(db.String(120), nullable=False)
-    is_home = db.Column(db.Boolean, nullable=False, default=True)
     location = db.Column(db.String(200), nullable=True)
 
     status = db.Column(db.String(20), nullable=False, default="scheduled")  # scheduled|played|cancelled
-    goals_for = db.Column(db.Integer, nullable=False, default=0)
-    goals_against = db.Column(db.Integer, nullable=False, default=0)
+    our_score = db.Column(db.Integer, nullable=False, default=0)
+    their_score = db.Column(db.Integer, nullable=False, default=0)
     notes = db.Column(db.Text, nullable=True)
-
-    played_at = db.Column(db.DateTime, nullable=True)
-    mvp_opens_at = db.Column(db.DateTime, nullable=True)
-    mvp_closes_at = db.Column(db.DateTime, nullable=True)
-
-    created_by_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
-    updated_by_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
 
     created_at = db.Column(db.DateTime, nullable=False, default=utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=utcnow, onupdate=utcnow)
 
     season = db.relationship("Season")
-    tournament = db.relationship("Tournament")
-    created_by = db.relationship("User", foreign_keys=[created_by_user_id])
-    updated_by = db.relationship("User", foreign_keys=[updated_by_user_id])
 
-    def set_played_now(self):
-        now = utcnow()
-        self.played_at = now
-        self.mvp_opens_at = now
-        self.mvp_closes_at = now + timedelta(hours=24)
-
-# ---------- Appearances ----------
-class Appearance(db.Model):
-    __tablename__ = "appearances"
+# ---------- Match player stats ----------
+class MatchPlayerStat(db.Model):
+    __tablename__ = "match_player_stats"
 
     id = db.Column(db.Integer, primary_key=True)
     match_id = db.Column(db.Integer, db.ForeignKey("matches.id"), nullable=False)
     player_id = db.Column(db.Integer, db.ForeignKey("players.id"), nullable=False)
+
+    played = db.Column(db.Boolean, nullable=False, default=True)
+    goals = db.Column(db.Integer, nullable=False, default=0)
+    yellow_cards = db.Column(db.Integer, nullable=False, default=0)
 
     created_at = db.Column(db.DateTime, nullable=False, default=utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=utcnow, onupdate=utcnow)
@@ -162,46 +145,25 @@ class Appearance(db.Model):
     player = db.relationship("Player")
 
     __table_args__ = (
-        db.UniqueConstraint("match_id", "player_id", name="uq_appearance_match_player"),
+        db.UniqueConstraint("match_id", "player_id", name="uq_match_player_stats"),
     )
 
-# ---------- Match events ----------
-class MatchEvent(db.Model):
-    __tablename__ = "match_events"
-
-    id = db.Column(db.Integer, primary_key=True)
-    match_id = db.Column(db.Integer, db.ForeignKey("matches.id"), nullable=False)
-    player_id = db.Column(db.Integer, db.ForeignKey("players.id"), nullable=False)
-
-    type = db.Column(db.String(20), nullable=False)  # goal|yellow|red
-    minute = db.Column(db.Integer, nullable=True)
-    detail = db.Column(db.Text, nullable=True)
-
-    created_by_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
-
-    created_at = db.Column(db.DateTime, nullable=False, default=utcnow)
-    updated_at = db.Column(db.DateTime, nullable=False, default=utcnow, onupdate=utcnow)
-
-    match = db.relationship("Match")
-    player = db.relationship("Player")
-    created_by = db.relationship("User")
-
 # ---------- MVP votes ----------
-class Vote(db.Model):
-    __tablename__ = "votes"
+class MVPVote(db.Model):
+    __tablename__ = "mvp_votes"
 
     id = db.Column(db.Integer, primary_key=True)
     match_id = db.Column(db.Integer, db.ForeignKey("matches.id"), nullable=False)
-    voter_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    voter_player_id = db.Column(db.Integer, db.ForeignKey("players.id"), nullable=False)
     voted_player_id = db.Column(db.Integer, db.ForeignKey("players.id"), nullable=False)
 
     created_at = db.Column(db.DateTime, nullable=False, default=utcnow)
-    updated_at = db.Column(db.DateTime, nullable=False, default=utcnow, onupdate=utcnow)
 
     match = db.relationship("Match")
-    voter = db.relationship("User")
-    voted_player = db.relationship("Player")
+    voter_player = db.relationship("Player", foreign_keys=[voter_player_id])
+    voted_player = db.relationship("Player", foreign_keys=[voted_player_id])
 
     __table_args__ = (
-        db.UniqueConstraint("match_id", "voter_user_id", name="uq_vote_match_voter"),
+        db.UniqueConstraint("match_id", "voter_player_id", name="uq_mvp_vote_match_voter"),
+        db.CheckConstraint("voter_player_id != voted_player_id", name="ck_mvp_vote_no_self"),
     )

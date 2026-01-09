@@ -37,6 +37,15 @@
           {% else %}
             <strong>(Inactive)</strong>
           {% endif %}
+          {% if player_users.get(player.id) %}
+            <strong>(User: {{ player_users.get(player.id).username }})</strong>
+          {% else %}
+            <form method="post" action="{{ url_for('admin.create_player_user', player_id=player.id) }}" style="display:inline;">
+              <input name="username" placeholder="username" />
+              <input name="password" type="password" placeholder="password" />
+              <button type="submit">Create user</button>
+            </form>
+          {% endif %}
         </li>
       {% endfor %}
     </ul>

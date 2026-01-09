@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Match details</h1>
+
+  <p><a href="{{ url_for('matches.list_matches') }}">Back to matches</a></p>
+
+  <h2>Basics</h2>
+  <ul>
+    <li>Date: {{ match.date }}</li>
+    <li>Opponent: {{ match.opponent }}</li>
+    <li>Location: {{ match.location or 'TBD' }}</li>
+    <li>Status: {{ match.status }}</li>
+    <li>Score: {{ match.our_score }} - {{ match.their_score }}</li>
+  </ul>
+  {% if match.notes %}
+    <p>Notes: {{ match.notes }}</p>
+  {% endif %}
+
+  <h2>My stats</h2>
+  {% if not voter_player_id %}
+    <p>Your user is not linked to a player.</p>
+  {% elif my_stat %}
+    <ul>
+      <li>Played: {{ 'Yes' if my_stat.played else 'No' }}</li>
+      <li>Goals: {{ my_stat.goals }}</li>
+      <li>Yellow cards: {{ my_stat.yellow_cards }}</li>
+    </ul>
+  {% else %}
+    <p>No stats recorded yet.</p>
+  {% endif %}
+
+  <h2>MVP voting</h2>
+  {% if not voter_player_id %}
+    <p>Your user is not linked to a player, so you cannot vote.</p>
+  {% else %}
+    {% if current_vote %}
+      <p>You voted for: {{ current_vote.voted_player.last_name }}, {{ current_vote.voted_player.first_name }}</p>
+      <a href="{{ url_for('matches.vote', match_id=match.id) }}">Update my vote</a>
+    {% else %}
+      <p>You have not voted yet.</p>
+      <a href="{{ url_for('matches.vote', match_id=match.id) }}">Vote now</a>
+    {% endif %}
+  {% endif %}
+
+  {% if match.status == 'played' %}
+    <h3>MVP results</h3>
+    {% if mvp_results %}
+      <ul>
+        {% for player, count in mvp_results %}
+          <li>{{ player.last_name }}, {{ player.first_name }} — {{ count }} votes</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No votes yet.</p>
+    {% endif %}
+  {% else %}
+    <p>MVP results will be available after the match is marked as played.</p>
+  {% endif %}
+{% endblock %}

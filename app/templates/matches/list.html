@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Matches</h1>
+
+  {% if season %}
+    <p>Season: {{ season.year }} {{ season.term }} - {{ season.tournament.name }}</p>
+    {% if matches %}
+      <ul>
+        {% for match in matches %}
+          <li>
+            {{ match.date }} vs {{ match.opponent }}
+            ({{ match.our_score }}-{{ match.their_score }}, {{ match.status }})
+            <a href="{{ url_for('matches.detail', match_id=match.id) }}">View</a>
+            <a href="{{ url_for('matches.vote', match_id=match.id) }}">Vote MVP</a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No matches yet for this season.</p>
+    {% endif %}
+  {% else %}
+    <p>No active season available.</p>
+  {% endif %}
+{% endblock %}

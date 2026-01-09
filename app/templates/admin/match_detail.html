@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Match detail</h1>
+
+  <p><a href="{{ url_for('admin.matches') }}">Back to matches</a></p>
+  <p><a href="{{ url_for('admin.match_mvp', match_id=match.id) }}">View MVP votes</a></p>
+
+  <h2>Match details</h2>
+  <form method="post">
+    <input type="hidden" name="form" value="match" />
+    <div>
+      <label>Date</label>
+      <input type="date" name="date" value="{{ match.date.strftime('%Y-%m-%d') }}" />
+    </div>
+    <div>
+      <label>Opponent</label>
+      <input name="opponent" value="{{ match.opponent }}" />
+    </div>
+    <div>
+      <label>Location</label>
+      <input name="location" value="{{ match.location or '' }}" />
+    </div>
+    <div>
+      <label>Status</label>
+      <select name="status">
+        <option value="scheduled" {% if match.status == 'scheduled' %}selected{% endif %}>scheduled</option>
+        <option value="played" {% if match.status == 'played' %}selected{% endif %}>played</option>
+        <option value="cancelled" {% if match.status == 'cancelled' %}selected{% endif %}>cancelled</option>
+      </select>
+    </div>
+    <div>
+      <label>Our score</label>
+      <input name="our_score" value="{{ match.our_score }}" />
+    </div>
+    <div>
+      <label>Their score</label>
+      <input name="their_score" value="{{ match.their_score }}" />
+    </div>
+    <div>
+      <label>Notes</label>
+      <textarea name="notes">{{ match.notes or '' }}</textarea>
+    </div>
+    <button type="submit">Save match</button>
+  </form>
+
+  <h2>Player stats</h2>
+  {% if roster_memberships %}
+    <form method="post">
+      <input type="hidden" name="form" value="stats" />
+      <table>
+        <tr>
+          <th>Player</th>
+          <th>Played</th>
+          <th>Goals</th>
+          <th>Yellow cards</th>
+        </tr>
+        {% for membership in roster_memberships %}
+          {% set player = membership.player %}
+          {% set stat = stats_by_player.get(player.id) %}
+          <tr>
+            <td>{{ player.last_name }}, {{ player.first_name }}</td>
+            <td>
+              <input type="checkbox" name="played_{{ player.id }}" {% if stat is none or stat.played %}checked{% endif %} />
+            </td>
+            <td>
+              <input name="goals_{{ player.id }}" value="{{ stat.goals if stat else 0 }}" />
+            </td>
+            <td>
+              <input name="yellow_{{ player.id }}" value="{{ stat.yellow_cards if stat else 0 }}" />
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+      <button type="submit">Save stats</button>
+    </form>
+  {% else %}
+    <p>No active roster members for this season.</p>
+  {% endif %}
+{% endblock %}
