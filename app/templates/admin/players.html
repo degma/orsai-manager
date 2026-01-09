@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Players</h1>
+
+  <p><a href="{{ url_for('admin.index') }}">Back to admin</a></p>
+
+  <h2>Create player</h2>
+  <form method="post">
+    <div>
+      <label>First name</label>
+      <input name="first_name" />
+    </div>
+    <div>
+      <label>Last name</label>
+      <input name="last_name" />
+    </div>
+    <div>
+      <label>Jersey number</label>
+      <input name="jersey_number" />
+    </div>
+    <button type="submit">Create</button>
+  </form>
+
+  <h2>Existing players</h2>
+  {% if players %}
+    <ul>
+      {% for player in players %}
+        <li>
+          {{ player.last_name }}, {{ player.first_name }}
+          {% if player.jersey_number is not none %}
+            (#{{ player.jersey_number }})
+          {% endif %}
+          {% if player.is_active %}
+            <form method="post" action="{{ url_for('admin.deactivate_player', player_id=player.id) }}" style="display:inline;">
+              <button type="submit">Deactivate</button>
+            </form>
+          {% else %}
+            <strong>(Inactive)</strong>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No players yet.</p>
+  {% endif %}
+{% endblock %}

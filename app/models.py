@@ -48,10 +48,10 @@ class Player(db.Model):
     __tablename__ = "players"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(120), nullable=False)
-    number = db.Column(db.Integer, nullable=True)
-    position = db.Column(db.String(50), nullable=True)
-    is_active_global = db.Column(db.Boolean, nullable=False, default=True)
+    first_name = db.Column(db.String(80), nullable=False)
+    last_name = db.Column(db.String(80), nullable=False)
+    jersey_number = db.Column(db.Integer, nullable=True)
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
 
     created_at = db.Column(db.DateTime, nullable=False, default=utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=utcnow, onupdate=utcnow)
@@ -62,7 +62,6 @@ class Tournament(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), unique=True, nullable=False)
-    notes = db.Column(db.Text, nullable=True)
 
     created_at = db.Column(db.DateTime, nullable=False, default=utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=utcnow, onupdate=utcnow)
@@ -73,47 +72,37 @@ class Season(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    team_id = db.Column(db.Integer, db.ForeignKey("teams.id"), nullable=False)
-    team = db.relationship("Team")
-
     year = db.Column(db.Integer, nullable=False)
     term = db.Column(db.String(20), nullable=False)  # winter/spring/summer/fall
     is_active = db.Column(db.Boolean, nullable=False, default=False)
 
-    primary_tournament_id = db.Column(db.Integer, db.ForeignKey("tournaments.id"), nullable=True)
-    primary_tournament = db.relationship("Tournament")
+    tournament_id = db.Column(db.Integer, db.ForeignKey("tournaments.id"), nullable=False)
+    tournament = db.relationship("Tournament")
 
     created_at = db.Column(db.DateTime, nullable=False, default=utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=utcnow, onupdate=utcnow)
 
     __table_args__ = (
-        db.UniqueConstraint("year", "term", name="uq_season_year_term"),
+        db.UniqueConstraint("year", "term", "tournament_id", name="uq_season_year_term_tournament"),
     )
 
 # ---------- Season roster ----------
-class SeasonPlayer(db.Model):
-    __tablename__ = "season_players"
+class RosterMembership(db.Model):
+    __tablename__ = "roster_memberships"
 
     id = db.Column(db.Integer, primary_key=True)
     season_id = db.Column(db.Integer, db.ForeignKey("seasons.id"), nullable=False)
     player_id = db.Column(db.Integer, db.ForeignKey("players.id"), nullable=False)
 
-    active = db.Column(db.Boolean, nullable=False, default=True)
+    status = db.Column(db.String(20), nullable=False, default="active")
     joined_at = db.Column(db.DateTime, nullable=False, default=utcnow)
     left_at = db.Column(db.DateTime, nullable=True)
-
-    updated_by_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
 
     created_at = db.Column(db.DateTime, nullable=False, default=utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=utcnow, onupdate=utcnow)
 
     season = db.relationship("Season")
     player = db.relationship("Player")
-    updated_by = db.relationship("User")
-
-    __table_args__ = (
-        db.UniqueConstraint("season_id", "player_id", name="uq_season_player"),
-    )
 
 # ---------- Match ----------
 class Match(db.Model):

@@ -11,7 +11,7 @@ login_manager.login_view = "auth.login"
 
 def create_app():
     
-    flask_app = Flask(__name__, template_folder="../templates", static_folder="../static")
+    flask_app = Flask(__name__, template_folder="templates", static_folder="static")
     flask_app.config.from_object(Config)
 
     db.init_app(flask_app)
@@ -31,4 +31,3 @@ def create_app():
 
 
     return flask_app
-

@@ -7,4 +7,12 @@
   </form>
 
   <p>Welcome, {{ current_user.username }}!</p>
+
+  <nav>
+    <ul>
+      <li><a href="{{ url_for('admin.tournaments') }}">Tournaments</a></li>
+      <li><a href="{{ url_for('admin.seasons') }}">Seasons</a></li>
+      <li><a href="{{ url_for('admin.players') }}">Players</a></li>
+    </ul>
+  </nav>
 {% endblock %}

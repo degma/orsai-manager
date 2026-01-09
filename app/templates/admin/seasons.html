@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Seasons</h1>
+
+  <p><a href="{{ url_for('admin.index') }}">Back to admin</a></p>
+
+  <h2>Create season</h2>
+  <form method="post">
+    <div>
+      <label>Year</label>
+      <input name="year" />
+    </div>
+    <div>
+      <label>Term</label>
+      <select name="term">
+        {% for term in terms %}
+          <option value="{{ term }}">{{ term }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Tournament</label>
+      <select name="tournament_id">
+        <option value="">Select</option>
+        {% for tournament in tournaments %}
+          <option value="{{ tournament.id }}">{{ tournament.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit">Create</button>
+  </form>
+
+  <h2>Existing seasons</h2>
+  {% if seasons %}
+    <ul>
+      {% for season in seasons %}
+        <li>
+          {{ season.year }} {{ season.term }} - {{ season.tournament.name }}
+          {% if season.is_active %}
+            <strong>(Active)</strong>
+          {% else %}
+            <form method="post" action="{{ url_for('admin.activate_season', season_id=season.id) }}" style="display:inline;">
+              <button type="submit">Activate</button>
+            </form>
+          {% endif %}
+          <a href="{{ url_for('admin.season_roster', season_id=season.id) }}">Roster</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No seasons yet.</p>
+  {% endif %}
+{% endblock %}

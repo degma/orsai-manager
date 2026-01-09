@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Tournaments</h1>
+
+  <p><a href="{{ url_for('admin.index') }}">Back to admin</a></p>
+
+  <h2>Create tournament</h2>
+  <form method="post">
+    <div>
+      <label>Name</label>
+      <input name="name" />
+    </div>
+    <button type="submit">Create</button>
+  </form>
+
+  <h2>Existing tournaments</h2>
+  {% if tournaments %}
+    <ul>
+      {% for tournament in tournaments %}
+        <li>
+          {{ tournament.name }}
+          <form method="post" action="{{ url_for('admin.delete_tournament', tournament_id=tournament.id) }}" style="display:inline;">
+            <button type="submit">Delete</button>
+          </form>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No tournaments yet.</p>
+  {% endif %}
+{% endblock %}

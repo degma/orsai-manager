@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Roster: {{ season.year }} {{ season.term }} - {{ season.tournament.name }}</h1>
+
+  <p><a href="{{ url_for('admin.seasons') }}">Back to seasons</a></p>
+
+  <h2>Add player</h2>
+  {% if available_players %}
+    <form method="post">
+      <input type="hidden" name="action" value="add" />
+      <select name="player_id">
+        {% for player in available_players %}
+          <option value="{{ player.id }}">{{ player.last_name }}, {{ player.first_name }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit">Add</button>
+    </form>
+  {% else %}
+    <p>No available players to add.</p>
+  {% endif %}
+
+  <h2>Active roster</h2>
+  {% if active_memberships %}
+    <ul>
+      {% for membership in active_memberships %}
+        <li>
+          {{ membership.player.last_name }}, {{ membership.player.first_name }}
+          <form method="post" style="display:inline;">
+            <input type="hidden" name="action" value="remove" />
+            <input type="hidden" name="player_id" value="{{ membership.player.id }}" />
+            <button type="submit">Remove</button>
+          </form>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No active players on roster.</p>
+  {% endif %}
+
+  <h2>Roster history</h2>
+  {% if inactive_memberships %}
+    <ul>
+      {% for membership in inactive_memberships %}
+        <li>
+          {{ membership.player.last_name }}, {{ membership.player.first_name }}
+          (Joined {{ membership.joined_at.strftime('%Y-%m-%d') }},
+          Left {{ membership.left_at.strftime('%Y-%m-%d') if membership.left_at else 'N/A' }})
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No roster history yet.</p>
+  {% endif %}
+{% endblock %}
