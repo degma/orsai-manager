@@ -1,19 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
-  <h1>Admin</h1>
-
-  <form method="post" action="{{ url_for('auth.logout') }}">
-    <button type="submit">Logout</button>
-  </form>
-
-  <p>Welcome, {{ current_user.username }}!</p>
-
-  <nav>
-    <ul>
-      <li><a href="{{ url_for('admin.tournaments') }}">Tournaments</a></li>
-      <li><a href="{{ url_for('admin.seasons') }}">Seasons</a></li>
-      <li><a href="{{ url_for('admin.players') }}">Players</a></li>
-      <li><a href="{{ url_for('admin.matches') }}">Matches</a></li>
-    </ul>
-  </nav>
+  <div class="card border-0">
+    <div class="card-body">
+      <h1 class="h4">Admin</h1>
+      <p class="text-muted mb-3">Welcome, {{ current_user.username }}.</p>
+      <div class="list-group">
+        <a class="list-group-item list-group-item-action" href="{{ url_for('admin.tournaments') }}">Tournaments</a>
+        <a class="list-group-item list-group-item-action" href="{{ url_for('admin.seasons') }}">Seasons</a>
+        <a class="list-group-item list-group-item-action" href="{{ url_for('admin.players') }}">Players</a>
+        <a class="list-group-item list-group-item-action" href="{{ url_for('admin.matches') }}">Matches</a>
+      </div>
+    </div>
+  </div>
 {% endblock %}

@@ -1,53 +1,71 @@
 {% extends "base.html" %}
 {% block content %}
-  <h1>Seasons</h1>
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h4 mb-0">Seasons</h1>
+    <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.index') }}">Back</a>
+  </div>
 
-  <p><a href="{{ url_for('admin.index') }}">Back to admin</a></p>
+  <div class="card border-0 mb-3">
+    <div class="card-body">
+      <h2 class="h6">Create season</h2>
+      <form method="post">
+        <div class="mb-3">
+          <label class="form-label">Year</label>
+          <input name="year" class="form-control" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Term</label>
+          <select name="term" class="form-select">
+            {% for term in terms %}
+              <option value="{{ term }}">{{ term }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Tournament</label>
+          <select name="tournament_id" class="form-select">
+            <option value="">Select</option>
+            {% for tournament in tournaments %}
+              <option value="{{ tournament.id }}">{{ tournament.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Create</button>
+      </form>
+    </div>
+  </div>
 
-  <h2>Create season</h2>
-  <form method="post">
-    <div>
-      <label>Year</label>
-      <input name="year" />
+  <div class="card border-0">
+    <div class="card-body">
+      <h2 class="h6">Existing seasons</h2>
+      {% if seasons %}
+        <div class="list-group list-group-flush">
+          {% for season in seasons %}
+            <div class="list-group-item px-0">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="fw-semibold">{{ season.year }} {{ season.term }}</div>
+                  <div class="text-muted small">{{ season.tournament.name }}</div>
+                </div>
+                {% if season.is_active %}
+                  <span class="badge text-bg-success">Active</span>
+                {% endif %}
+              </div>
+              <div class="d-flex gap-2 mt-3">
+                {% if not season.is_active %}
+                  <form method="post" action="{{ url_for('admin.activate_season', season_id=season.id) }}">
+                    <button type="submit" class="btn btn-sm btn-outline-primary">Activate</button>
+                  </form>
+                {% endif %}
+                <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.season_roster', season_id=season.id) }}">Roster</a>
+                <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('matches.season_stats', season_id=season.id) }}">Stats</a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted mb-0">No seasons yet.</p>
+      {% endif %}
     </div>
-    <div>
-      <label>Term</label>
-      <select name="term">
-        {% for term in terms %}
-          <option value="{{ term }}">{{ term }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <div>
-      <label>Tournament</label>
-      <select name="tournament_id">
-        <option value="">Select</option>
-        {% for tournament in tournaments %}
-          <option value="{{ tournament.id }}">{{ tournament.name }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <button type="submit">Create</button>
-  </form>
-
-  <h2>Existing seasons</h2>
-  {% if seasons %}
-    <ul>
-      {% for season in seasons %}
-        <li>
-          {{ season.year }} {{ season.term }} - {{ season.tournament.name }}
-          {% if season.is_active %}
-            <strong>(Active)</strong>
-          {% else %}
-            <form method="post" action="{{ url_for('admin.activate_season', season_id=season.id) }}" style="display:inline;">
-              <button type="submit">Activate</button>
-            </form>
-          {% endif %}
-          <a href="{{ url_for('admin.season_roster', season_id=season.id) }}">Roster</a>
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>No seasons yet.</p>
-  {% endif %}
+  </div>
 {% endblock %}

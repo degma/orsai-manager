@@ -1,47 +1,54 @@
 {% extends "base.html" %}
 {% block content %}
-  <h1>Match detail</h1>
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h4 mb-0">Match detail</h1>
+    <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.matches') }}">Back</a>
+  </div>
 
-  <p><a href="{{ url_for('admin.matches') }}">Back to matches</a></p>
-  <p><a href="{{ url_for('admin.match_mvp', match_id=match.id) }}">View MVP votes</a></p>
-  <p><a href="{{ url_for('admin.match_stats', match_id=match.id) }}">Manage match stats</a></p>
+  <div class="d-flex flex-wrap gap-2 mb-3">
+    <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.match_mvp', match_id=match.id) }}">View MVP votes</a>
+    <a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.match_stats', match_id=match.id) }}">Manage match stats</a>
+  </div>
 
-  <h2>Match details</h2>
-  <form method="post">
-    <input type="hidden" name="form" value="match" />
-    <div>
-      <label>Date</label>
-      <input type="date" name="date" value="{{ match.date.strftime('%Y-%m-%d') }}" />
+  <div class="card border-0">
+    <div class="card-body">
+      <h2 class="h6">Match details</h2>
+      <form method="post">
+        <input type="hidden" name="form" value="match" />
+        <div class="mb-3">
+          <label class="form-label">Date</label>
+          <input type="date" name="date" class="form-control" value="{{ match.date.strftime('%Y-%m-%d') }}" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Opponent</label>
+          <input name="opponent" class="form-control" value="{{ match.opponent }}" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Location</label>
+          <input name="location" class="form-control" value="{{ match.location or '' }}" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-select">
+            <option value="scheduled" {% if match.status == 'scheduled' %}selected{% endif %}>scheduled</option>
+            <option value="played" {% if match.status == 'played' %}selected{% endif %}>played</option>
+            <option value="cancelled" {% if match.status == 'cancelled' %}selected{% endif %}>cancelled</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Our score</label>
+          <input name="our_score" class="form-control" value="{{ match.our_score }}" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Their score</label>
+          <input name="their_score" class="form-control" value="{{ match.their_score }}" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Notes</label>
+          <textarea name="notes" class="form-control" rows="3">{{ match.notes or '' }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Save match</button>
+      </form>
     </div>
-    <div>
-      <label>Opponent</label>
-      <input name="opponent" value="{{ match.opponent }}" />
-    </div>
-    <div>
-      <label>Location</label>
-      <input name="location" value="{{ match.location or '' }}" />
-    </div>
-    <div>
-      <label>Status</label>
-      <select name="status">
-        <option value="scheduled" {% if match.status == 'scheduled' %}selected{% endif %}>scheduled</option>
-        <option value="played" {% if match.status == 'played' %}selected{% endif %}>played</option>
-        <option value="cancelled" {% if match.status == 'cancelled' %}selected{% endif %}>cancelled</option>
-      </select>
-    </div>
-    <div>
-      <label>Our score</label>
-      <input name="our_score" value="{{ match.our_score }}" />
-    </div>
-    <div>
-      <label>Their score</label>
-      <input name="their_score" value="{{ match.their_score }}" />
-    </div>
-    <div>
-      <label>Notes</label>
-      <textarea name="notes">{{ match.notes or '' }}</textarea>
-    </div>
-    <button type="submit">Save match</button>
-  </form>
-
+  </div>
 {% endblock %}

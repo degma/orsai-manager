@@ -1,51 +1,68 @@
 {% extends "base.html" %}
 {% block content %}
-  <h1>Matches</h1>
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h4 mb-0">Matches</h1>
+    <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.index') }}">Back</a>
+  </div>
 
-  <p><a href="{{ url_for('admin.index') }}">Back to admin</a></p>
+  <div class="card border-0 mb-3">
+    <div class="card-body">
+      <h2 class="h6">Create match</h2>
+      <form method="post">
+        <div class="mb-3">
+          <label class="form-label">Season</label>
+          <select name="season_id" class="form-select">
+            <option value="">Select</option>
+            {% for season in seasons %}
+              <option value="{{ season.id }}" {% if season.id == active_season_id %}selected{% endif %}>
+                {{ season.year }} {{ season.term }} - {{ season.tournament.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Date</label>
+          <input type="date" name="date" class="form-control" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Opponent</label>
+          <input name="opponent" class="form-control" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Location</label>
+          <input name="location" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Create</button>
+      </form>
+    </div>
+  </div>
 
-  <h2>Create match</h2>
-  <form method="post">
-    <div>
-      <label>Season</label>
-      <select name="season_id">
-        <option value="">Select</option>
-        {% for season in seasons %}
-          <option value="{{ season.id }}" {% if season.id == active_season_id %}selected{% endif %}>
-            {{ season.year }} {{ season.term }} - {{ season.tournament.name }}
-          </option>
-        {% endfor %}
-      </select>
+  <div class="card border-0">
+    <div class="card-body">
+      <h2 class="h6">Existing matches</h2>
+      {% if matches %}
+        <div class="list-group list-group-flush">
+          {% for match in matches %}
+            <div class="list-group-item px-0">
+              <div class="d-flex justify-content-between">
+                <div>
+                  <div class="fw-semibold">{{ match.season.year }} {{ match.season.term }}</div>
+                  <div class="text-muted small">{{ match.date }} vs {{ match.opponent }}</div>
+                </div>
+                <span class="badge text-bg-primary">{{ match.our_score }}-{{ match.their_score }}</span>
+              </div>
+              <div class="d-flex gap-2 flex-wrap mt-2">
+                <span class="badge text-bg-secondary">{{ match.status }}</span>
+                <a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.match_detail', match_id=match.id) }}">Edit</a>
+                <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.match_stats', match_id=match.id) }}">Manage stats</a>
+                <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.match_mvp', match_id=match.id) }}">MVP</a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted mb-0">No matches yet.</p>
+      {% endif %}
     </div>
-    <div>
-      <label>Date</label>
-      <input type="date" name="date" />
-    </div>
-    <div>
-      <label>Opponent</label>
-      <input name="opponent" />
-    </div>
-    <div>
-      <label>Location</label>
-      <input name="location" />
-    </div>
-    <button type="submit">Create</button>
-  </form>
-
-  <h2>Existing matches</h2>
-  {% if matches %}
-    <ul>
-      {% for match in matches %}
-        <li>
-          {{ match.season.year }} {{ match.season.term }} - {{ match.date }} vs {{ match.opponent }}
-          ({{ match.our_score }}-{{ match.their_score }}, {{ match.status }})
-          <a href="{{ url_for('admin.match_detail', match_id=match.id) }}">Edit</a>
-          <a href="{{ url_for('admin.match_stats', match_id=match.id) }}">Manage stats</a>
-          <a href="{{ url_for('admin.match_mvp', match_id=match.id) }}">MVP</a>
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>No matches yet.</p>
-  {% endif %}
+  </div>
 {% endblock %}

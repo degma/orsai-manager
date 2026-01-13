@@ -1,0 +1,44 @@
+:root {
+  --app-radius: 14px;
+  --app-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+body {
+  background-color: #f6f7fb;
+}
+
+.app-shell {
+  max-width: 520px;
+}
+
+.card,
+.list-group-item,
+.alert,
+.form-control,
+.form-select,
+.btn {
+  border-radius: var(--app-radius);
+}
+
+.card {
+  box-shadow: var(--app-shadow);
+}
+
+.list-group-item + .list-group-item {
+  border-top-width: 0;
+}
+
+.btn,
+.form-control,
+.form-select {
+  min-height: 44px;
+}
+
+.badge {
+  border-radius: 999px;
+}
+
+.card-header {
+  border-top-left-radius: var(--app-radius);
+  border-top-right-radius: var(--app-radius);
+}

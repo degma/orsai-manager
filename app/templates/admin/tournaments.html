@@ -1,31 +1,40 @@
 {% extends "base.html" %}
 {% block content %}
-  <h1>Tournaments</h1>
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h4 mb-0">Tournaments</h1>
+    <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.index') }}">Back</a>
+  </div>
 
-  <p><a href="{{ url_for('admin.index') }}">Back to admin</a></p>
-
-  <h2>Create tournament</h2>
-  <form method="post">
-    <div>
-      <label>Name</label>
-      <input name="name" />
+  <div class="card border-0 mb-3">
+    <div class="card-body">
+      <h2 class="h6">Create tournament</h2>
+      <form method="post">
+        <div class="mb-3">
+          <label class="form-label">Name</label>
+          <input name="name" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Create</button>
+      </form>
     </div>
-    <button type="submit">Create</button>
-  </form>
+  </div>
 
-  <h2>Existing tournaments</h2>
-  {% if tournaments %}
-    <ul>
-      {% for tournament in tournaments %}
-        <li>
-          {{ tournament.name }}
-          <form method="post" action="{{ url_for('admin.delete_tournament', tournament_id=tournament.id) }}" style="display:inline;">
-            <button type="submit">Delete</button>
-          </form>
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>No tournaments yet.</p>
-  {% endif %}
+  <div class="card border-0">
+    <div class="card-body">
+      <h2 class="h6">Existing tournaments</h2>
+      {% if tournaments %}
+        <div class="list-group list-group-flush">
+          {% for tournament in tournaments %}
+            <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+              <span>{{ tournament.name }}</span>
+              <form method="post" action="{{ url_for('admin.delete_tournament', tournament_id=tournament.id) }}">
+                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+              </form>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted mb-0">No tournaments yet.</p>
+      {% endif %}
+    </div>
+  </div>
 {% endblock %}

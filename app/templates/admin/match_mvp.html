@@ -1,27 +1,40 @@
 {% extends "base.html" %}
 {% block content %}
-  <h1>MVP Votes</h1>
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h4 mb-0">MVP votes</h1>
+    <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.matches') }}">Back</a>
+  </div>
 
-  <p><a href="{{ url_for('admin.matches') }}">Back to matches</a></p>
+  <div class="card border-0 mb-3">
+    <div class="card-body">
+      <div class="fw-semibold">{{ match.date }} vs {{ match.opponent }}</div>
+      <div class="text-muted small">{{ match.season.year }} {{ match.season.term }} - {{ match.season.tournament.name }}</div>
+    </div>
+  </div>
 
-  <h2>{{ match.date }} vs {{ match.opponent }}</h2>
+  <div class="card border-0">
+    <div class="card-body">
+      {% if votes %}
+        <h2 class="h6">Vote counts</h2>
+        <div class="list-group list-group-flush mb-3">
+          {% for player, count in votes %}
+            <div class="list-group-item px-0 d-flex justify-content-between">
+              <span>{{ player.last_name }}, {{ player.first_name }}</span>
+              <span class="badge text-bg-primary">{{ count }}</span>
+            </div>
+          {% endfor %}
+        </div>
 
-  {% if votes %}
-    <h3>Vote counts</h3>
-    <ul>
-      {% for player, count in votes %}
-        <li>{{ player.last_name }}, {{ player.first_name }} - {{ count }}</li>
-      {% endfor %}
-    </ul>
-
-    <h3>Winner{% if winners|length > 1 %}s{% endif %}</h3>
-    <p>
-      {% for player in winners %}
-        {{ player.last_name }}, {{ player.first_name }}{% if not loop.last %}; {% endif %}
-      {% endfor %}
-      ({{ max_votes }} vote{% if max_votes != 1 %}s{% endif %})
-    </p>
-  {% else %}
-    <p>No votes yet.</p>
-  {% endif %}
+        <h2 class="h6">Winner{% if winners|length > 1 %}s{% endif %}</h2>
+        <p class="mb-0">
+          {% for player in winners %}
+            {{ player.last_name }}, {{ player.first_name }}{% if not loop.last %}; {% endif %}
+          {% endfor %}
+          ({{ max_votes }} vote{% if max_votes != 1 %}s{% endif %})
+        </p>
+      {% else %}
+        <p class="text-muted mb-0">No votes yet.</p>
+      {% endif %}
+    </div>
+  </div>
 {% endblock %}

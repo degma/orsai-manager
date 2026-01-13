@@ -1,27 +1,32 @@
 {% extends "base.html" %}
 {% block content %}
-  <h1>Vote MVP</h1>
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h4 mb-0">Vote MVP</h1>
+    <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('matches.list_matches') }}">Back</a>
+  </div>
 
-  <p><a href="{{ url_for('matches.list_matches') }}">Back to matches</a></p>
+  <div class="card border-0">
+    <div class="card-body">
+      <h2 class="h6 mb-3">{{ match.date }} vs {{ match.opponent }}</h2>
 
-  <h2>{{ match.date }} vs {{ match.opponent }}</h2>
-
-  {% if eligible_players %}
-    <form method="post">
-      <div>
-        <label>Vote for</label>
-        <select name="voted_player_id">
-          <option value="">Select</option>
-          {% for player in eligible_players %}
-            <option value="{{ player.id }}" {% if current_vote and current_vote.voted_player_id == player.id %}selected{% endif %}>
-              {{ player.last_name }}, {{ player.first_name }}
-            </option>
-          {% endfor %}
-        </select>
-      </div>
-      <button type="submit">Submit vote</button>
-    </form>
-  {% else %}
-    <p>No eligible players for this match.</p>
-  {% endif %}
+      {% if eligible_players %}
+        <form method="post">
+          <div class="mb-3">
+            <label class="form-label">Vote for</label>
+            <select name="voted_player_id" class="form-select">
+              <option value="">Select</option>
+              {% for player in eligible_players %}
+                <option value="{{ player.id }}" {% if current_vote and current_vote.voted_player_id == player.id %}selected{% endif %}>
+                  {{ player.last_name }}, {{ player.first_name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Submit vote</button>
+        </form>
+      {% else %}
+        <p class="text-muted mb-0">No eligible players for this match.</p>
+      {% endif %}
+    </div>
+  </div>
 {% endblock %}
