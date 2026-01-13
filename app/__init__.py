@@ -29,10 +29,12 @@ def create_app():
     from app.routes.auth import auth_bp
     from app.routes.admin import admin_bp
     from app.routes.matches import matches_bp
+    from app.routes.telegram_api import telegram_api_bp
 
     flask_app.register_blueprint(auth_bp)
     flask_app.register_blueprint(admin_bp)
     flask_app.register_blueprint(matches_bp)
+    flask_app.register_blueprint(telegram_api_bp)
 
     from app.cli import register_cli
     register_cli(flask_app)
