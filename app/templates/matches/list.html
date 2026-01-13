@@ -4,6 +4,7 @@
 
   {% if season %}
     <p>Season: {{ season.year }} {{ season.term }} - {{ season.tournament.name }}</p>
+    <p><a href="{{ url_for('matches.season_stats', season_id=season.id) }}">Season stats</a></p>
     {% if matches %}
       <ul>
         {% for match in matches %}

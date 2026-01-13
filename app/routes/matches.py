@@ -77,6 +77,99 @@ def detail(match_id):
         voter_player_id=voter_player_id,
     )
 
+@matches_bp.route("/seasons/<int:season_id>/stats")
+@login_required
+def season_stats(season_id):
+    season = db.session.get(Season, season_id)
+    if not season:
+        abort(404)
+
+    is_admin = getattr(current_user, "role", None) == "admin"
+    voter_player_id = getattr(current_user, "player_id", None)
+    if not is_admin:
+        if not voter_player_id:
+            abort(403)
+        membership = RosterMembership.query.filter_by(
+            season_id=season.id,
+            player_id=voter_player_id,
+        ).first()
+        if not membership:
+            abort(403)
+
+    roster_player_ids = (
+        db.session.query(RosterMembership.player_id)
+        .filter_by(season_id=season.id)
+        .distinct()
+        .subquery()
+    )
+
+    stats_subquery = (
+        db.session.query(
+            MatchPlayerStat.player_id.label("player_id"),
+            db.func.sum(
+                db.case(
+                    (MatchPlayerStat.played.is_(True), 1),
+                    else_=0,
+                )
+            ).label("games_played"),
+            db.func.coalesce(db.func.sum(MatchPlayerStat.goals), 0).label("goals"),
+            db.func.coalesce(db.func.sum(MatchPlayerStat.yellow_cards), 0).label("yellow_cards"),
+            db.func.coalesce(db.func.sum(MatchPlayerStat.red_cards), 0).label("red_cards"),
+        )
+        .join(Match, db.and_(
+            Match.id == MatchPlayerStat.match_id,
+            Match.season_id == season.id,
+        ))
+        .group_by(MatchPlayerStat.player_id)
+        .subquery()
+    )
+
+    votes_subquery = (
+        db.session.query(
+            MVPVote.voted_player_id.label("player_id"),
+            db.func.count(MVPVote.id).label("mvp_votes_received"),
+        )
+        .join(Match, db.and_(
+            Match.id == MVPVote.match_id,
+            Match.season_id == season.id,
+        ))
+        .group_by(MVPVote.voted_player_id)
+        .subquery()
+    )
+
+    stats = (
+        db.session.query(
+            Player,
+            db.func.coalesce(stats_subquery.c.games_played, 0).label("games_played"),
+            db.func.coalesce(stats_subquery.c.goals, 0).label("goals"),
+            db.func.coalesce(stats_subquery.c.yellow_cards, 0).label("yellow_cards"),
+            db.func.coalesce(stats_subquery.c.red_cards, 0).label("red_cards"),
+            db.func.coalesce(votes_subquery.c.mvp_votes_received, 0).label("mvp_votes_received"),
+        )
+        .join(roster_player_ids, roster_player_ids.c.player_id == Player.id)
+        .outerjoin(stats_subquery, stats_subquery.c.player_id == Player.id)
+        .outerjoin(votes_subquery, votes_subquery.c.player_id == Player.id)
+        .order_by(
+            db.func.coalesce(stats_subquery.c.goals, 0).desc(),
+            Player.last_name.asc(),
+            Player.first_name.asc(),
+        )
+        .all()
+    )
+
+    matches = (
+        Match.query.filter_by(season_id=season.id)
+        .order_by(Match.date.desc(), Match.id.desc())
+        .all()
+    )
+
+    return render_template(
+        "seasons/stats.html",
+        season=season,
+        stats=stats,
+        matches=matches,
+    )
+
 @matches_bp.route("/matches/<int:match_id>/vote", methods=["GET", "POST"])
 @login_required
 def vote(match_id):

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Season stats</h1>
+
+  <p><a href="{{ url_for('matches.list_matches') }}">Back to matches</a></p>
+
+  <h2>{{ season.year }} {{ season.term }} - {{ season.tournament.name }}</h2>
+  <p>Total matches: {{ matches | length }}</p>
+
+  <h3>Player totals (sorted by goals)</h3>
+  {% if stats %}
+    <table>
+      <tr>
+        <th>Player</th>
+        <th>Games played</th>
+        <th>Goals</th>
+        <th>Yellow cards</th>
+        <th>Red cards</th>
+        <th>MVP votes received</th>
+      </tr>
+      {% for player, games_played, goals, yellow_cards, red_cards, mvp_votes_received in stats %}
+        <tr>
+          <td>{{ player.last_name }}, {{ player.first_name }}</td>
+          <td>{{ games_played }}</td>
+          <td>{{ goals }}</td>
+          <td>{{ yellow_cards }}</td>
+          <td>{{ red_cards }}</td>
+          <td>{{ mvp_votes_received }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p>No rostered players for this season.</p>
+  {% endif %}
+
+  <h3>Matches</h3>
+  {% if matches %}
+    <ul>
+      {% for match in matches %}
+        <li>
+          {{ match.date }} vs {{ match.opponent }}
+          ({{ match.our_score }}-{{ match.their_score }}, {{ match.status }})
+          <a href="{{ url_for('matches.detail', match_id=match.id) }}">View</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No matches yet.</p>
+  {% endif %}
+{% endblock %}
