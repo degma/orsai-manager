@@ -19,11 +19,12 @@
   <h2>My stats</h2>
   {% if not voter_player_id %}
     <p>Your user is not linked to a player.</p>
-  {% elif my_stat %}
+    {% elif my_stat %}
     <ul>
       <li>Played: {{ 'Yes' if my_stat.played else 'No' }}</li>
       <li>Goals: {{ my_stat.goals }}</li>
       <li>Yellow cards: {{ my_stat.yellow_cards }}</li>
+      <li>Red cards: {{ my_stat.red_cards }}</li>
     </ul>
   {% else %}
     <p>No stats recorded yet.</p>

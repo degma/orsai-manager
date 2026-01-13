@@ -40,6 +40,7 @@
           {{ match.season.year }} {{ match.season.term }} - {{ match.date }} vs {{ match.opponent }}
           ({{ match.our_score }}-{{ match.their_score }}, {{ match.status }})
           <a href="{{ url_for('admin.match_detail', match_id=match.id) }}">Edit</a>
+          <a href="{{ url_for('admin.match_stats', match_id=match.id) }}">Manage stats</a>
           <a href="{{ url_for('admin.match_mvp', match_id=match.id) }}">MVP</a>
         </li>
       {% endfor %}

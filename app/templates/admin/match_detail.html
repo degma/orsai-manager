@@ -4,6 +4,7 @@
 
   <p><a href="{{ url_for('admin.matches') }}">Back to matches</a></p>
   <p><a href="{{ url_for('admin.match_mvp', match_id=match.id) }}">View MVP votes</a></p>
+  <p><a href="{{ url_for('admin.match_stats', match_id=match.id) }}">Manage match stats</a></p>
 
   <h2>Match details</h2>
   <form method="post">
@@ -43,37 +44,4 @@
     <button type="submit">Save match</button>
   </form>
 
-  <h2>Player stats</h2>
-  {% if roster_memberships %}
-    <form method="post">
-      <input type="hidden" name="form" value="stats" />
-      <table>
-        <tr>
-          <th>Player</th>
-          <th>Played</th>
-          <th>Goals</th>
-          <th>Yellow cards</th>
-        </tr>
-        {% for membership in roster_memberships %}
-          {% set player = membership.player %}
-          {% set stat = stats_by_player.get(player.id) %}
-          <tr>
-            <td>{{ player.last_name }}, {{ player.first_name }}</td>
-            <td>
-              <input type="checkbox" name="played_{{ player.id }}" {% if stat is none or stat.played %}checked{% endif %} />
-            </td>
-            <td>
-              <input name="goals_{{ player.id }}" value="{{ stat.goals if stat else 0 }}" />
-            </td>
-            <td>
-              <input name="yellow_{{ player.id }}" value="{{ stat.yellow_cards if stat else 0 }}" />
-            </td>
-          </tr>
-        {% endfor %}
-      </table>
-      <button type="submit">Save stats</button>
-    </form>
-  {% else %}
-    <p>No active roster members for this season.</p>
-  {% endif %}
 {% endblock %}

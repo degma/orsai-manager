@@ -388,49 +388,18 @@ def match_detail(match_id):
                 flash("Match updated.", "success")
                 return redirect(url_for("admin.match_detail", match_id=match.id))
 
-        elif form_type == "stats":
-            roster_memberships = (
-                RosterMembership.query.filter_by(season_id=match.season_id, status="active")
-                .join(Player)
-                .order_by(Player.last_name.asc(), Player.first_name.asc())
-                .all()
-            )
-            existing_stats = {
-                stat.player_id: stat
-                for stat in MatchPlayerStat.query.filter_by(match_id=match.id).all()
-            }
+    return render_template(
+        "admin/match_detail.html",
+        match=match,
+    )
 
-            for membership in roster_memberships:
-                player_id = membership.player_id
-                played = request.form.get(f"played_{player_id}") == "on"
-                goals_raw = (request.form.get(f"goals_{player_id}") or "").strip()
-                yellow_raw = (request.form.get(f"yellow_{player_id}") or "").strip()
-
-                try:
-                    goals = int(goals_raw) if goals_raw else 0
-                except ValueError:
-                    goals = None
-
-                try:
-                    yellow_cards = int(yellow_raw) if yellow_raw else 0
-                except ValueError:
-                    yellow_cards = None
-
-                if goals is None or yellow_cards is None:
-                    flash("Goals and yellow cards must be whole numbers.", "error")
-                    return redirect(url_for("admin.match_detail", match_id=match.id))
-
-                stat = existing_stats.get(player_id)
-                if not stat:
-                    stat = MatchPlayerStat(match_id=match.id, player_id=player_id)
-                    db.session.add(stat)
-                stat.played = played
-                stat.goals = goals
-                stat.yellow_cards = yellow_cards
-
-            db.session.commit()
-            flash("Match stats updated.", "success")
-            return redirect(url_for("admin.match_detail", match_id=match.id))
+@admin_bp.route("/matches/<int:match_id>/stats", methods=["GET", "POST"])
+@login_required
+def match_stats(match_id):
+    require_admin()
+    match = db.session.get(Match, match_id)
+    if not match:
+        abort(404)
 
     roster_memberships = (
         RosterMembership.query.filter_by(season_id=match.season_id, status="active")
@@ -438,15 +407,63 @@ def match_detail(match_id):
         .order_by(Player.last_name.asc(), Player.first_name.asc())
         .all()
     )
+    if roster_memberships:
+        players = [membership.player for membership in roster_memberships]
+    else:
+        players = Player.query.order_by(Player.last_name.asc(), Player.first_name.asc()).all()
+
     stats_by_player = {
         stat.player_id: stat
         for stat in MatchPlayerStat.query.filter_by(match_id=match.id).all()
     }
 
+    if request.method == "POST":
+        for player in players:
+            played = request.form.get(f"played_{player.id}") == "on"
+            goals_raw = (request.form.get(f"goals_{player.id}") or "").strip()
+            yellow_raw = (request.form.get(f"yellow_{player.id}") or "").strip()
+            red_raw = (request.form.get(f"red_{player.id}") or "").strip()
+
+            try:
+                goals = int(goals_raw) if goals_raw else 0
+            except ValueError:
+                goals = None
+
+            try:
+                yellow_cards = int(yellow_raw) if yellow_raw else 0
+            except ValueError:
+                yellow_cards = None
+
+            try:
+                red_cards = int(red_raw) if red_raw else 0
+            except ValueError:
+                red_cards = None
+
+            if goals is None or yellow_cards is None or red_cards is None:
+                flash("Goals and cards must be whole numbers.", "error")
+                return redirect(url_for("admin.match_stats", match_id=match.id))
+            if goals < 0 or yellow_cards < 0 or red_cards < 0:
+                flash("Goals and cards must be zero or higher.", "error")
+                return redirect(url_for("admin.match_stats", match_id=match.id))
+
+            stat = stats_by_player.get(player.id)
+            if not stat:
+                stat = MatchPlayerStat(match_id=match.id, player_id=player.id)
+                db.session.add(stat)
+                stats_by_player[player.id] = stat
+            stat.played = played
+            stat.goals = goals
+            stat.yellow_cards = yellow_cards
+            stat.red_cards = red_cards
+
+        db.session.commit()
+        flash("Match stats updated.", "success")
+        return redirect(url_for("admin.match_stats", match_id=match.id))
+
     return render_template(
-        "admin/match_detail.html",
+        "admin/match_stats.html",
         match=match,
-        roster_memberships=roster_memberships,
+        players=players,
         stats_by_player=stats_by_player,
     )
 

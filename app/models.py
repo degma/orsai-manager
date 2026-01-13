@@ -137,6 +137,7 @@ class MatchPlayerStat(db.Model):
     played = db.Column(db.Boolean, nullable=False, default=True)
     goals = db.Column(db.Integer, nullable=False, default=0)
     yellow_cards = db.Column(db.Integer, nullable=False, default=0)
+    red_cards = db.Column(db.Integer, nullable=False, default=0)
 
     created_at = db.Column(db.DateTime, nullable=False, default=utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=utcnow, onupdate=utcnow)
@@ -146,6 +147,7 @@ class MatchPlayerStat(db.Model):
 
     __table_args__ = (
         db.UniqueConstraint("match_id", "player_id", name="uq_match_player_stats"),
+        db.CheckConstraint("red_cards >= 0", name="ck_match_player_stats_red_cards_nonneg"),
     )
 
 # ---------- MVP votes ----------

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Manage match stats</h1>
+
+  <p><a href="{{ url_for('admin.match_detail', match_id=match.id) }}">Back to match</a></p>
+
+  <h2>{{ match.date }} vs {{ match.opponent }}</h2>
+
+  {% if players %}
+    <form method="post">
+      <table>
+        <tr>
+          <th>Player</th>
+          <th>Played</th>
+          <th>Goals</th>
+          <th>Yellow cards</th>
+          <th>Red cards</th>
+        </tr>
+        {% for player in players %}
+          {% set stat = stats_by_player.get(player.id) %}
+          <tr>
+            <td>{{ player.last_name }}, {{ player.first_name }}</td>
+            <td>
+              <input type="checkbox" name="played_{{ player.id }}" {% if stat is none or stat.played %}checked{% endif %} />
+            </td>
+            <td>
+              <input name="goals_{{ player.id }}" value="{{ stat.goals if stat else 0 }}" />
+            </td>
+            <td>
+              <input name="yellow_{{ player.id }}" value="{{ stat.yellow_cards if stat else 0 }}" />
+            </td>
+            <td>
+              <input name="red_{{ player.id }}" value="{{ stat.red_cards if stat else 0 }}" />
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+      <button type="submit">Save stats</button>
+    </form>
+  {% else %}
+    <p>No players available.</p>
+  {% endif %}
+{% endblock %}
